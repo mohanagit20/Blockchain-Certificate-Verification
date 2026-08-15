@@ -2,6 +2,7 @@ const express = require("express");
 const crypto = require("crypto");
 const multer = require("multer");
 const fs = require("fs");
+const QRcode = require("qrcode");
 
 const app = express();
 const PORT = 5000;
@@ -23,7 +24,7 @@ app.get("/", (req, res) => {
 });
 
 // Certificate upload route
-app.post("/upload", upload.single("certificate"), (req, res) => {
+app.post("/upload", upload.single("certificate"), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({
             success: false,
@@ -33,12 +34,15 @@ app.post("/upload", upload.single("certificate"), (req, res) => {
     const fileData = fs.readFileSync(req.file.path);
     const hash = crypto.createHash("sha256").update(fileData).digest("hex");
     fs.writeFileSync("certificate-hash.txt", hash);
+    const qrcode = await QRcode.toDataURL('http://localhost:5000/verify?hash=${hash}'   
+    );
     res.json({
         success: true,
         message: "Certificate uploaded successfully",
         filename: req.file.originalname,
         storedFile: req.file.filename,
-        hash: hash
+        hash: hash,
+        qrCode: qrcode
     });
 });
 // Certificate verification route
@@ -56,7 +60,6 @@ app.post("/verify", upload.single("certificate"), (req, res) => {
         .createHash("sha256")
         .update(fileData)
         .digest("hex");
-
     const originalHash = fs.readFileSync(
         "certificate-hash.txt",
         "utf8"
