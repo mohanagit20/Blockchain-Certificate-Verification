@@ -208,13 +208,47 @@ if (!hash) {
 } else {
 
     fetch(
-        "http://localhost:5000/verify?hash="
-        + encodeURIComponent(hash)
-    )
-    .then(response => response.json())
-    .then(data => {
+    "http://localhost:5000/verify?hash="
+    + encodeURIComponent(hash)
+)
+.then(response => response.json())
+.then(data => {
 
-        if (data.verified) {
+    if (data.revoked) {
+
+        result.innerHTML = `
+            <div class="status tampered">
+                <div class="status-icon">🚫</div>
+                <div class="status-title">
+                    Certificate Revoked
+                </div>
+                <p>
+                    This certificate was previously genuine
+                    but has since been revoked by the issuer.
+                </p>
+            </div>
+
+            <div class="details">
+                <div class="detail-row">
+                    <div class="label">
+                        Verification Status
+                    </div>
+                    <div class="value">
+                        🚫 Revoked
+                    </div>
+                </div>
+                <div class="detail-row">
+                    <div class="label">
+                        Certificate Hash
+                    </div>
+                    <div class="value">
+                        ${hash}
+                    </div>
+                </div>
+            </div>
+        `;
+
+    } else if (data.verified) {
 
             result.innerHTML = `
                 <div class="status genuine">

@@ -1,6 +1,6 @@
 {
   "_format": "hh3-sol-build-info-1",
-  "id": "solc-0_8_28-d26f236eb1eebed2a398907189a7d4f5581336c6",
+  "id": "solc-0_8_28-cb5004950e5ed3d210c6c1be58084176ab2579ac",
   "solcVersion": "0.8.28",
   "solcLongVersion": "0.8.28+commit.7893614a",
   "compilerType": "solc",
@@ -42,7 +42,7 @@
     },
     "sources": {
       "project/contracts/CertificateVerification.sol": {
-        "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.24;\r\n\r\ncontract CertificateVerification {\r\n\r\n    mapping(string => bool) private certificateHashes;\r\n\r\n    function storeCertificate(string memory hash) public {\r\n        certificateHashes[hash] = true;\r\n    }\r\n\r\n    function verifyCertificate(string memory hash)\r\n        public\r\n        view\r\n        returns (bool)\r\n    {\r\n        return certificateHashes[hash];\r\n    }\r\n} "
+        "content": "pragma solidity ^0.8.24;\r\n\r\ncontract CertificateVerification {\r\n\r\n    mapping(string => bool) private certificateHashes;\r\n    mapping(string => bool) private revokedHashes;\r\n\r\n    event CertificateStored(string hash);\r\n    event CertificateRevoked(string hash);\r\n\r\n    function storeCertificate(string memory hash) public {\r\n        certificateHashes[hash] = true;\r\n    }\r\n\r\n    function revokeCertificate(string memory hash) public {\r\n        require(certificateHashes[hash], \"Certificate does not exist\");\r\n        revokedHashes[hash] = true;\r\n    }\r\n\r\n    function verifyCertificate(string memory hash) public view returns (bool) {\r\n        return certificateHashes[hash] && !revokedHashes[hash];\r\n    }\r\n\r\n    function isRevoked(string memory hash) public view returns (bool) {\r\n        return revokedHashes[hash];\r\n    }\r\n}"
       }
     }
   }

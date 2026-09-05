@@ -13,6 +13,7 @@ app.use((req, res, next) => {
     res.header("Access-Control-Allow-Headers", "*");
     next();
 });
+app.use(express.json());
 
 // Make sure uploads folder exists
 if (!fs.existsSync("uploads")) {
@@ -219,58 +220,39 @@ app.post(
 // =====================================================
 
 app.get("/verify", async (req, res) => {
-
     try {
-
         const hash = req.query.hash;
-
         if (!hash) {
-            return res.status(400).json({
-                success: false,
-                message: "Hash is required"
-            });
+            return res.status(400).json({ success: false, message: "Hash is required" });
+        }
+        const verified = await contract.verifyCertificate(hash);
+        const revoked = await contract.isRevoked(hash);
+
+        if (revoked) {
+            return res.json({ success: true, verified: false, revoked: true, message: "Certificate has been revoked", hash: hash });
         }
 
-        // Verify hash directly on blockchain
-        const verified =
-            await contract.verifyCertificate(hash);
-
-        if (verified) {
-
-            return res.json({
-                success: true,
-                verified: true,
-                message:
-                    "Certificate is genuine",
-                hash: hash
-            });
-
-        }
-
-        return res.json({
-            success: true,
-            verified: false,
-            message:
-                "Certificate is tampered or invalid",
-            hash: hash
-        });
-
+        return res.json({ success: true, verified: verified, revoked: false, message: verified ? "Certificate is genuine" : "Certificate is tampered or invalid", hash: hash });
     } catch (error) {
-
-        console.error(
-            "QR VERIFY ERROR:",
-            error
-        );
-
-        res.status(500).json({
-            success: false,
-            message:
-                "Blockchain verification failed",
-            error: error.message
-        });
+        console.error("QR VERIFY ERROR:", error);
+        res.status(500).json({ success: false, message: "Blockchain verification failed", error: error.message });
     }
 });
 
+app.post("/revoke", async (req, res) => {
+    try {
+        const { hash } = req.body;
+        if (!hash) {
+            return res.status(400).json({ success: false, message: "Hash is required" });
+        }
+        const tx = await contract.revokeCertificate(hash);
+        await tx.wait();
+        res.json({ success: true, message: "Certificate revoked successfully" });
+    } catch (error) {
+        console.error("REVOKE ERROR:", error);
+        res.status(500).json({ success: false, message: "Revocation failed", error: error.message });
+    }
+});
 
 // =====================================================
 // START SERVER
