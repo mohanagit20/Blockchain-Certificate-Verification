@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CertiChain | Home</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #0F172A;
+            color: #F8FAFC;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 25px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: #1E293B;
+            border: 1px solid #334155;
+            border-radius: 20px;
+            padding: 50px 40px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+            text-align: center;
+        }
+
+        .logo {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 25px;
+            border-radius: 18px;
+            background: #6366F1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 34px;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .brand {
+            color: #818CF8;
+        }
+
+        .subtitle {
+            color: #94A3B8;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            font-size: 15px;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .btn {
+            display: block;
+            text-decoration: none;
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+
+        .btn-primary {
+            background: #6366F1;
+            color: #F8FAFC;
+        }
+
+        .btn-primary:hover {
+            background: #4F46E5;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #0F172A;
+            color: #C7D2FE;
+            border: 1px solid #6366F1;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(99, 102, 241, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .method {
+            margin-top: 30px;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid #6366F1;
+            color: #C7D2FE;
+            font-size: 13px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #64748B;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="logo">🔐</div>
+
+    <h1><span class="brand">CertiChain</span> University Portal</h1>
+
+    <p class="subtitle">
+        Blockchain-based academic certificate authenticity verification.
+        Upload a certificate to register it on-chain, or verify one instantly.
+    </p>
+
+    <div class="btn-group">
+        <a href="upload.html" class="btn btn-primary">📤 Upload a Certificate</a>
+        <a href="verify-page.html" class="btn btn-secondary">🔍 Verify a Certificate</a>
+    </div>
+
+    <div class="method">
+        🔗 Powered by Blockchain + SHA-256 Hashing
+    </div>
+
+</div>
+
+<div class="footer">
+    🔒 Secure • Tamper Detection • Blockchain Verified
+</div>
+
+</body>
+</html>
