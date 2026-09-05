@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QR Code</title>
+</head>
+<body>
+    <h2>Certificate QR Code</h2>
+
+    <img id="qr" width="300">
+
+    <script>
+        const qrCode = prompt("Paste the complete qrCode value:");
+
+        if (qrCode) {
+            document.getElementById("qr").src = qrCode;
+        }
+    </script>
+</body>
+</html>

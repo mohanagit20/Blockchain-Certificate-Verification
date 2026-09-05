@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CertiChain | University Portal</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #0F172A;
+            color: #F8FAFC;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 25px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background: #1E293B;
+            border: 1px solid #334155;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+        }
+
+        .logo {
+            width: 65px;
+            height: 65px;
+            margin: 0 auto 20px;
+            border-radius: 16px;
+            background: #6366F1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+
+        .brand {
+            color: #818CF8;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #94A3B8;
+            line-height: 1.6;
+            margin-bottom: 35px;
+        }
+
+        .upload-box {
+            border: 2px dashed #475569;
+            border-radius: 16px;
+            padding: 35px 20px;
+            text-align: center;
+            background: #0F172A;
+            transition: 0.3s;
+        }
+
+        .upload-box:hover {
+            border-color: #6366F1;
+        }
+
+        .upload-icon {
+            font-size: 42px;
+            margin-bottom: 15px;
+        }
+
+        .upload-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .upload-info {
+            color: #94A3B8;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            color: #CBD5E1;
+        }
+
+        input[type="file"]::file-selector-button {
+            background: #6366F1;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 25px;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: #6366F1;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #4F46E5;
+            transform: translateY(-1px);
+        }
+
+        #result {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+            line-height: 1.6;
+        }
+
+        .success {
+            background: rgba(34, 197, 94, 0.12);
+            border: 1px solid #22C55E;
+            color: #BBF7D0;
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid #EF4444;
+            color: #FECACA;
+        }
+
+        .hash {
+            color: #94A3B8;
+            font-size: 12px;
+            word-break: break-all;
+            background: #0F172A;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 5px;
+        }
+
+        #qrImage {
+            display: block;
+            width: 220px;
+            margin: 25px auto 5px;
+            padding: 10px;
+            background: white;
+            border-radius: 12px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #64748B;
+            font-size: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="logo">🔗</div>
+
+    <h1>
+        <span class="brand">CertiChain</span>
+        University Portal
+    </h1>
+
+    <p class="subtitle">
+        Securely register academic certificates on the blockchain
+        and generate a unique verification QR code.
+    </p>
+
+    <div class="upload-box">
+
+        <div class="upload-icon">📜</div>
+
+        <div class="upload-title">
+            Upload Academic Certificate
+        </div>
+
+        <div class="upload-info">
+            Select a PDF certificate to register it securely.
+        </div>
+
+        <input
+            type="file"
+            id="certificate"
+            accept=".pdf"
+        >
+
+    </div>
+
+    <button onclick="uploadCertificate()">
+        🔐 Upload & Register Certificate
+    </button>
+
+    <div id="result"></div>
+
+    <img id="qrImage" style="display:none;">
+
+    <div class="footer">
+        🔒 Blockchain-secured • SHA-256 Verification
+    </div>
+
+</div>
+
+<script>
+async function uploadCertificate() {
+
+    const fileInput = document.getElementById("certificate");
+    const result = document.getElementById("result");
+    const qrImage = document.getElementById("qrImage");
+
+    if (!fileInput.files.length) {
+
+        result.style.display = "block";
+        result.className = "error";
+        result.innerHTML =
+            "❌ Please select a certificate PDF.";
+
+        return;
+    }
+
+    const formData = new FormData();
+
+    formData.append(
+        "certificate",
+        fileInput.files[0]
+    );
+
+    result.style.display = "block";
+    result.className = "";
+    result.innerHTML =
+        "⏳ Uploading certificate and registering on blockchain...";
+
+    qrImage.style.display = "none";
+
+    try {
+
+        const response = await fetch(
+            "http://localhost:5000/upload",
+            {
+                method: "POST",
+                body: formData
+            }
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+
+            result.className = "success";
+
+            result.innerHTML = `
+                <strong>✅ Certificate Registered Successfully!</strong>
+
+                <br><br>
+
+                <strong>Certificate:</strong>
+                ${data.filename}
+
+                <br><br>
+
+                <strong>Blockchain Transaction:</strong>
+
+                <div class="hash">
+                    ${data.blockchainTransaction}
+                </div>
+
+                <br>
+
+                <strong>SHA-256 Hash:</strong>
+
+                <div class="hash">
+                    ${data.hash}
+                </div>
+
+                <br>
+
+                <strong>🔐 Verification QR Code Generated</strong>
+            `;
+
+            qrImage.src = data.qrCode;
+            qrImage.style.display = "block";
+
+        } else {
+
+            result.className = "error";
+
+            result.innerHTML =
+                "❌ " + data.message;
+        }
+
+    } catch (error) {
+
+        result.className = "error";
+
+        result.innerHTML =
+            "❌ Unable to connect to the backend server.";
+    }
+}
+</script>
+
+</body>
+</html>
