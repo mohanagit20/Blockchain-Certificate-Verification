@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CertiChain | Revoke Certificate</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #0F172A;
+            color: #F8FAFC;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 25px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background: #1E293B;
+            border: 1px solid #334155;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+        }
+
+        .logo {
+            width: 65px;
+            height: 65px;
+            margin: 0 auto 20px;
+            border-radius: 16px;
+            background: #EF4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+
+        .brand {
+            color: #818CF8;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #94A3B8;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            color: #94A3B8;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            background: #0F172A;
+            color: #F8FAFC;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #EF4444;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            background: #EF4444;
+            color: #F8FAFC;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        button:hover {
+            background: #DC2626;
+        }
+
+        button:disabled {
+            background: #475569;
+            cursor: not-allowed;
+        }
+
+        .status {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.success {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid #EF4444;
+        }
+
+        .status.error {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid #EF4444;
+        }
+
+        .status-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .status-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .status-msg {
+            color: #94A3B8;
+            font-size: 14px;
+            word-break: break-all;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            color: #818CF8;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #64748B;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="logo">🚫</div>
+
+    <h1>
+        <span class="brand">CertiChain</span>
+        Revoke
+    </h1>
+
+    <p class="subtitle">
+        Revoke a previously issued certificate. This marks it as invalid
+        on the blockchain without deleting the original record.
+    </p>
+
+    <label for="hashInput">Certificate Hash</label>
+    <input type="text" id="hashInput" placeholder="Paste the certificate's SHA-256 hash here">
+
+    <button id="revokeBtn" onclick="revokeCertificate()">Revoke Certificate</button>
+
+    <div class="status" id="result">
+        <div class="status-icon" id="resultIcon"></div>
+        <div class="status-title" id="resultTitle"></div>
+        <div class="status-msg" id="resultMsg"></div>
+    </div>
+
+    <a href="verify-page.html" class="back-link">← Go to Verification Page</a>
+
+</div>
+
+<div class="footer">
+    🔒 Secure • Tamper Detection • Blockchain Verified
+</div>
+
+<script>
+async function revokeCertificate() {
+    const hash = document.getElementById("hashInput").value.trim();
+    const btn = document.getElementById("revokeBtn");
+    const result = document.getElementById("result");
+    const icon = document.getElementById("resultIcon");
+    const title = document.getElementById("resultTitle");
+    const msg = document.getElementById("resultMsg");
+
+    if (!hash) {
+        result.className = "status show error";
+        icon.textContent = "⚠️";
+        title.textContent = "Hash Required";
+        msg.textContent = "Please paste a certificate hash before revoking.";
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Revoking...";
+    result.className = "status show";
+
+    try {
+        const response = await fetch("http://localhost:5000/revoke", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ hash: hash })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            result.className = "status show success";
+            icon.textContent = "🚫";
+            title.textContent = "Certificate Revoked";
+            msg.textContent = "Hash: " + hash;
+        } else {
+            result.className = "status show error";
+            icon.textContent = "❌";
+            title.textContent = "Revocation Failed";
+            msg.textContent = data.message || "Unknown error occurred.";
+        }
+    } catch (error) {
+        result.className = "status show error";
+        icon.textContent = "⚠️";
+        title.textContent = "Connection Error";
+        msg.textContent = "Unable to reach the backend server.";
+    }
+
+    btn.disabled = false;
+    btn.textContent = "Revoke Certificate";
+}
+</script>
+
+</body>
+</html>
