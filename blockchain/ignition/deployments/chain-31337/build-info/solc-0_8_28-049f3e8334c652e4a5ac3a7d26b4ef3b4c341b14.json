@@ -1,0 +1,49 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-049f3e8334c652e4a5ac3a7d26b4ef3b4c341b14",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "compilerType": "solc",
+  "toolVersions": {
+    "hardhat": "3.13.0"
+  },
+  "userSourceNameMap": {
+    "contracts/CertificateVerification.sol": "project/contracts/CertificateVerification.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode.linkReferences",
+            "evm.bytecode.object",
+            "evm.bytecode.opcodes",
+            "evm.bytecode.sourceMap",
+            "evm.deployedBytecode.immutableReferences",
+            "evm.deployedBytecode.linkReferences",
+            "evm.deployedBytecode.object",
+            "evm.deployedBytecode.opcodes",
+            "evm.deployedBytecode.sourceMap",
+            "evm.methodIdentifiers"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/CertificateVerification.sol": {
+        "content": "pragma solidity ^0.8.24;\r\n\r\ncontract CertificateVerification {\r\n\r\n    address public owner;\r\n\r\n    mapping(string => bool) private certificateHashes;\r\n    mapping(string => bool) private revokedHashes;\r\n\r\n    event CertificateStored(string hash);\r\n    event CertificateRevoked(string hash);\r\n\r\n    modifier onlyOwner() {\r\n        require(msg.sender == owner, \"Not authorized: only the issuing institution can perform this action\");\r\n        _;\r\n    }\r\n\r\n    constructor() {\r\n        owner = msg.sender;\r\n    }\r\n\r\n    function storeCertificate(string memory hash) public onlyOwner {\r\n        certificateHashes[hash] = true;\r\n        emit CertificateStored(hash);\r\n    }\r\n\r\n    function revokeCertificate(string memory hash) public onlyOwner {\r\n        require(certificateHashes[hash], \"Certificate does not exist\");\r\n        revokedHashes[hash] = true;\r\n        emit CertificateRevoked(hash);\r\n    }\r\n\r\n    function verifyCertificate(string memory hash) public view returns (bool) {\r\n        return certificateHashes[hash] && !revokedHashes[hash];\r\n    }\r\n\r\n    function isRevoked(string memory hash) public view returns (bool) {\r\n        return revokedHashes[hash];\r\n    }\r\n}"
+      }
+    }
+  }
+}

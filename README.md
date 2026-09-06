@@ -1,7 +1,6 @@
-# Blockchain Certificate Verification System
 # CertiChain — Blockchain-Based Academic Certificate Verification System
 
-CertiChain verifies whether an academic certificate is genuine, tampered, or revoked, using SHA-256 hashing combined with Ethereum blockchain storage. A university uploads a certificate through a simple web portal; the system stores a tamper-proof hash on-chain, generates a QR code for instant verification, and allows the issuer to revoke a certificate later if needed — all without ever deleting the original blockchain record.
+CertiChain verifies whether an academic certificate is genuine, tampered, or revoked, using SHA-256 hashing combined with Ethereum blockchain storage. A university uploads a certificate through a simple web portal; the system stores a tamper-proof hash on-chain, generates a QR code for instant verification, and allows the issuer to revoke a certificate later if needed — all without ever deleting the original blockchain record. Only the authorized issuing institution's wallet can register or revoke certificates; anyone can verify one.
 
 ## Complete Workflow
 
@@ -63,19 +62,32 @@ pragma solidity ^0.8.24;
 
 contract CertificateVerification {
 
+    address public owner;
+
     mapping(string => bool) private certificateHashes;
     mapping(string => bool) private revokedHashes;
 
     event CertificateStored(string hash);
     event CertificateRevoked(string hash);
 
-    function storeCertificate(string memory hash) public {
-        certificateHashes[hash] = true;
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not authorized: only the issuing institution can perform this action");
+        _;
     }
 
-    function revokeCertificate(string memory hash) public {
+    constructor() {
+        owner = msg.sender;
+    }
+
+    function storeCertificate(string memory hash) public onlyOwner {
+        certificateHashes[hash] = true;
+        emit CertificateStored(hash);
+    }
+
+    function revokeCertificate(string memory hash) public onlyOwner {
         require(certificateHashes[hash], "Certificate does not exist");
         revokedHashes[hash] = true;
+        emit CertificateRevoked(hash);
     }
 
     function verifyCertificate(string memory hash) public view returns (bool) {
@@ -87,6 +99,22 @@ contract CertificateVerification {
     }
 }
 ```
+
+**Access control:** `storeCertificate()` and `revokeCertificate()` are restricted to the contract `owner` (the wallet that deployed the contract — i.e. the issuing institution's backend). Anyone can still call `verifyCertificate()` and `isRevoked()`, since verification must remain publicly accessible. This prevents any third party from registering fake certificates or revoking genuine ones.
+
+**Verifying it works — `blockchain/test-access-control.cjs`:**
+A test script attempts to call `storeCertificate()` using a *different*, unauthorized wallet (not the contract owner). Run it with:
+```bash
+cd blockchain
+node test-access-control.cjs
+```
+Expected output confirms the transaction is rejected:
+```
+Attempting to store a certificate using an UNAUTHORIZED account...
+EXPECTED: transaction was rejected
+Reason: Not authorized: only the issuing institution can perform this action
+```
+(Edit the script's `UNAUTHORIZED_PRIVATE_KEY` to any Hardhat test account other than Account #0 before running.)
 
 ## API Endpoints
 
@@ -162,6 +190,7 @@ npx serve .
 - Verification API (hash lookup against blockchain)
 - Tampered-certificate detection confirmed working
 - **Certificate revocation** — issuer can revoke a previously genuine certificate on-chain; verification distinguishes genuine, revoked, and invalid/tampered as three separate states (most basic hash+blockchain implementations only support two: valid/invalid, with no way to invalidate a certificate after issuance)
+- **Access control** — only the contract owner (the issuing institution's wallet) can store or revoke certificates; verified with a dedicated test script using an unauthorized wallet, which is correctly rejected on-chain
 - **Homepage (`index.html`)** — single entry point linking to Upload, Verify, and Revoke, styled consistently with the rest of the app
 - **Revoke UI (`revoke.html`)** — browser-based form to revoke a certificate by pasting its hash, calling the backend directly with no terminal/PowerShell commands needed
 - Frontend upload, verification, and revoke pages, fully wired to the backend, each with clear success/error states
@@ -175,6 +204,7 @@ npx serve .
 - CORS is enabled on the backend to allow the frontend (port 3000) to communicate with it (port 5000).
 - The deployed local contract address will change each time the Hardhat node restarts and the contract is redeployed — update the backend's contract address/artifact reference accordingly.
 - `serve.json` in the frontend folder disables clean-URL redirects (which otherwise strip `.html` and break the `?hash=` query string) and explicitly routes `/` to `index.html`.
+- Since access control was added, the backend's `PRIVATE_KEY` in `server.js` **must** match the same account used to deploy the contract (by default, Hardhat's Account #0), otherwise upload/revoke calls will fail with "Not authorized."
 
 ## Environment Versions (for future reproducibility)
 
