@@ -6,7 +6,7 @@ const QRcode = require("qrcode");
 const { ethers } = require("ethers");
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 // Allow frontend to communicate with backend
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -41,18 +41,16 @@ const upload = multer({ storage: storage });
 // =====================================================
 
 const provider = new ethers.JsonRpcProvider(
-    "http://127.0.0.1:8545"
+    process.env.RPC_URL || "http://127.0.0.1:8545"
 );
 
 const CONTRACT_ADDRESS =
     "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
-const contractArtifact = require(
-    "../blockchain/artifacts/contracts/CertificateVerification.sol/CertificateVerification.json"
-);
+const contractArtifact = require("./CertificateVerification.json");
 
 // Use Account #0 private key from your CURRENT Hardhat node
-const PRIVATE_KEY = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+   const PRIVATE_KEY = process.env.PRIVATE_KEY || "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 
 const wallet = new ethers.Wallet(
     PRIVATE_KEY,
@@ -60,7 +58,7 @@ const wallet = new ethers.Wallet(
 );
 
 const contract = new ethers.Contract(
-    CONTRACT_ADDRESS,
+    process.env.CONTRACT_ADDRESS || "0x5FbDB2315678afecb367f032d93F642f64180aa3",
     contractArtifact.abi,
     wallet
 );
@@ -108,8 +106,8 @@ app.post(
             // Wait for blockchain confirmation
             await tx.wait();
        // Generate QR code
-               const qrcode = await QRcode.toDataURL(
-       `http://localhost:3000/verify-page.html?hash=${hash}`
+                  const qrcode = await QRcode.toDataURL(
+       `${process.env.FRONTEND_URL || "http://localhost:3000"}/verify-page.html?hash=${hash}`
    );
 
             // Send response
